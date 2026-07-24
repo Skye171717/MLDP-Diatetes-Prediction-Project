@@ -1,0 +1,168 @@
+import joblib
+import streamlit as st
+import numpy as np
+import pandas as pd
+ 
+## Page configuration
+st.set_page_config(
+    page_title="Diabetes Risk Prediction",
+    layout="centered"
+)
+ 
+## Load trained model
+@st.cache_resource
+def load_model():
+    try:
+        return joblib.load("random_forest_model.pkl")
+    except FileNotFoundError:
+        return None
+ 
+model = load_model()
+ 
+## Page header
+st.title("Diabetes Risk Prediction App")
+st.markdown(
+    "Estimate the likelihood that you have diabetes,"
+    "based on your health profile."
+)
+ 
+if model is None:
+    st.error("Could not find `random_forest_model.pkl`. Please place the model file alongside this script.")
+    st.stop()
+ 
+st.divider()
+ 
+ 
+## Sidebar - information for the user
+with st.sidebar:
+    st.header("ℹ️ About this app")
+    st.write(
+        "Fill in the patient details on the main page and click "
+        "**Predict Diabetes Risk** to get an instant prediction."
+    )
+ 
+ 
+## Define input options 
+genders = ["Female", "Male", "Other"]
+smoking_histories = ["never", "No Info", "current", "former", "ever", "not current"]
+ 
+ 
+## User inputs, laid out in columns for a cleaner, more interactive design
+st.subheader("Patient Information")
+ 
+col1, col2 = st.columns(2)
+ 
+with col1:
+    gender_selected = st.selectbox("Gender", genders)
+    age_selected = st.number_input(
+        "Age (years)", min_value=0, max_value=80, value=30, step=1
+    )
+    hypertension_selected = st.radio(
+        "Does the patient have hypertension?", ["No", "Yes"], horizontal=True
+    )
+    heart_disease_selected = st.radio(
+        "Does the patient have heart disease?", ["No", "Yes"], horizontal=True
+    )
+ 
+with col2:
+    smoking_history_selected = st.selectbox("Smoking History", smoking_histories)
+    bmi_selected = st.slider(
+        "BMI (Body Mass Index)", min_value=10.0, max_value=100.0, value=25.0, step=0.1
+    )
+    hba1c_selected = st.slider(
+        "HbA1c Level (%)", min_value=3.5, max_value=9.0, value=5.5, step=0.1
+    )
+    glucose_selected = st.slider(
+        "Blood Glucose Level (mg/dL)", min_value=80, max_value=300, value=100, step=1
+    )
+ 
+st.divider()
+ 
+ 
+## Predict button
+if st.button("Predict Diabetes Risk", use_container_width=True):
+ 
+    ## Basic input validation with user-facing error messages
+    validation_errors = []
+ 
+    if age_selected <= 0:
+        validation_errors.append("Age must be greater than 0.")
+    if bmi_selected <= 0:
+        validation_errors.append("BMI must be greater than 0.")
+    if hba1c_selected <= 0:
+        validation_errors.append("HbA1c level must be greater than 0.")
+    if glucose_selected <= 0:
+        validation_errors.append("Blood glucose level must be greater than 0.")
+ 
+    if validation_errors:
+        for err in validation_errors:
+            st.error(f"{err}")
+    else:
+        try:
+            with st.spinner("Running prediction..."):
+ 
+                ## Map Yes/No radio inputs back to the 0/1 encoding used in training
+                hypertension_value = 1 if hypertension_selected == "Yes" else 0
+                heart_disease_value = 1 if heart_disease_selected == "Yes" else 0
+ 
+                ## Build a single-row DataFrame from the user inputs
+                df_input = pd.DataFrame({
+                    "gender": [gender_selected],
+                    "age": [age_selected],
+                    "hypertension": [hypertension_value],
+                    "heart_disease": [heart_disease_value],
+                    "smoking_history": [smoking_history_selected],
+                    "bmi": [bmi_selected],
+                    "HbA1c_level": [hba1c_selected],
+                    "blood_glucose_level": [glucose_selected],
+                })
+ 
+                ## One-hot encode categorical columns
+                df_input = pd.get_dummies(
+                    df_input, columns=["gender", "smoking_history"], drop_first=True
+                )
+ 
+                ## Align columns with the features the model was trained on
+                df_input = df_input.reindex(
+                    columns=model.feature_names_in_, fill_value=0
+                )
+ 
+                ## Generate prediction
+                prediction = model.predict(df_input)[0]
+ 
+            ## Display results
+            if prediction == 1:
+                st.error("The model predicts this patient **may have diabetes**.")
+            else:
+                st.success("The model predicts this patient **is unlikely to have diabetes**.")
+ 
+            ## Show prediction probability if the model supports it
+            if hasattr(model, "predict_proba"):
+                proba = model.predict_proba(df_input)[0]
+                diabetes_prob = proba[1] if len(proba) > 1 else proba[0]
+                st.metric("Estimated Probability of Diabetes", f"{diabetes_prob * 100:.1f}%")
+                st.progress(min(max(diabetes_prob, 0.0), 1.0))
+ 
+            st.caption(
+                "This prediction is generated by a machine learning model and "
+                "should not be used as a substitute for professional medical diagnosis."
+            )
+ 
+        except Exception as e:
+            st.error(
+                "Something went wrong while generating the prediction. "
+                f"Details: {e}"
+            )
+ 
+ 
+## Page styling
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(135deg, #eaf6ff 0%, #ffffff 100%);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
