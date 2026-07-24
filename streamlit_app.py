@@ -13,7 +13,7 @@ st.set_page_config(
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load("random_forest_model.pkl")
+        return joblib.load("decision_tree_model.pkl")
     except FileNotFoundError:
         return None
  
@@ -27,7 +27,7 @@ st.markdown(
 )
  
 if model is None:
-    st.error("Could not find `random_forest_model.pkl`. Please place the model file alongside this script.")
+    st.error("Could not find `decision_tree_model.pkl`. Please place the model file alongside this script.")
     st.stop()
  
 st.divider()
