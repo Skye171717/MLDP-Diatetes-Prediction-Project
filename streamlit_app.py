@@ -43,7 +43,7 @@ with st.sidebar:
  
  
 ## Define input options 
-genders = ["Female", "Male", "Other"]
+genders = ["Female", "Male"]
 smoking_histories = ["never", "No Info", "current", "former", "ever", "not current"]
  
  
