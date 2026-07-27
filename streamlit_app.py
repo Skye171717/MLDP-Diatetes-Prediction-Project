@@ -44,7 +44,7 @@ with st.sidebar:
  
 ## Define input options 
 genders = ["Female", "Male"]
-smoking_histories = ["never", "No Info", "current", "former", "ever", "not current"]
+smoking_histories = ["Past Smoker", "Current Smoker", "Non-Smoker", "Prefer Not to Say"]
  
  
 ## User inputs, laid out in columns for a cleaner, more interactive design
