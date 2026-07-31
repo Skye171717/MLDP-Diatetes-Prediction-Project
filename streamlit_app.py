@@ -2,7 +2,6 @@ import os
 import textwrap
 import joblib
 import streamlit as st
-import numpy as np
 import pandas as pd
 
 ## Page configuration
@@ -329,7 +328,7 @@ with st.sidebar:
     st.markdown(textwrap.dedent("""
         <div class="sidebar-card">
             <div class="sidebar-card-heading">How it works</div>
-            <p>Fill in the patient details, then select
+            <p>Fill in your health details, then select
             <strong>Predict Diabetes Risk</strong> to get an instant
             screening result.</p>
         </div>
@@ -374,10 +373,10 @@ with reset_col2:
         st.rerun()
 
 
-## Patient information grouped in a bordered container
-patient_info_container = st.container(border=True)
-with patient_info_container:
-    st.markdown('<div class="section-heading">Patient Information</div>', unsafe_allow_html=True)
+## User information grouped in a bordered container
+user_info_container = st.container(border=True)
+with user_info_container:
+    st.markdown('<div class="section-heading">Your Health Information</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -397,10 +396,10 @@ with patient_info_container:
                 "Results above that age are less reliable."
             )
         hypertension_selected = st.radio(
-            "Does the patient have hypertension?", ["No", "Yes"], horizontal=True, key="hypertension"
+            "Have you been diagnosed with hypertension?", ["No", "Yes"], horizontal=True, key="hypertension"
         )
         heart_disease_selected = st.radio(
-            "Does the patient have heart disease?", ["No", "Yes"], horizontal=True, key="heart_disease"
+            "Have you been diagnosed with heart disease?", ["No", "Yes"], horizontal=True, key="heart_disease"
         )
 
     with col2:
@@ -450,8 +449,8 @@ with st.expander("What do HbA1c and blood glucose mean, and where can I get test
         "- **HbA1c** is measured through a blood test ordered by a doctor "
         "- available at GP clinics, polyclinics, or through the "
         "**Screen for Life** national screening programme (subsidised "
-        "for eligible Singaporeans and PRs). Glucometers and test strips "
-        "can be purchased from pharmacies such as Guardian, Watsons, and Unity.\n"
+        "for eligible Singaporeans and PRs). Some HbA1c test kits "
+        "can be purchased online from sites like Shopee, but lab testing is reccomended\n"
         "- **Blood glucose** can also be tested at a clinic or polyclinic, "
         "or self-tested at home using a glucometer / blood glucose test "
         "kit, available at pharmacies such as Guardian, Watsons and "
@@ -537,9 +536,9 @@ if predict_clicked:
         risk_text_class = "high-risk-text" if prediction == 1 else "low-risk-text"
 
         result_message = (
-            "The model predicts this patient may have diabetes."
+            "The model predicts you are at a higher risk of diabetes."
             if prediction == 1
-            else "The model predicts this patient is unlikely to have diabetes."
+            else "The model predicts you are at a lower risk of diabetes."
         )
 
         result_html = textwrap.dedent(f"""
@@ -575,11 +574,11 @@ if predict_clicked:
 
         if bmi_selected >= 27.5:
             flagged_factors.append(
-                f"BMI ({bmi_selected:.1f}) is in the obese range for Singaporean populations (27.5 or above)."
+                f"BMI ({bmi_selected:.1f}) is in the obese range using the Ministry of Health BMI classification (27.5 or above)."
             )
         elif bmi_selected >= 23:
             flagged_factors.append(
-                f"BMI ({bmi_selected:.1f}) is in the overweight range for Singaporean populations (23 to 27.4)."
+                f"BMI ({bmi_selected:.1f}) is in the overweight range using the Ministry of Health BMI classification (23 to 27.4)."
             )
 
         if age_selected >= 45:
@@ -600,7 +599,7 @@ if predict_clicked:
 
         factors_html = textwrap.dedent(f"""
         <div class="factors-card">
-            <div class="factors-heading">Contributing Risk Factors</div>
+            <div class="factors-heading">Health Indicators Identified</div>
             <ul>
                 {factors_list_html}
             </ul>
