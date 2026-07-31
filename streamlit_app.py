@@ -450,7 +450,7 @@ with st.expander("What do HbA1c and blood glucose mean, and where can I get test
         "- available at GP clinics, polyclinics, or through the "
         "**Screen for Life** national screening programme (subsidised "
         "for eligible Singaporeans and PRs). Some HbA1c test kits "
-        "can be purchased online from sites like Shopee, but lab testing is reccomended\n"
+        "can be purchased online from sites like Shopee, but lab testing is reccomended.\n"
         "- **Blood glucose** can also be tested at a clinic or polyclinic, "
         "or self-tested at home using a glucometer / blood glucose test "
         "kit, available at pharmacies such as Guardian, Watsons and "
